@@ -88,4 +88,4 @@ También noté que, aunque el código no es tan complejo, sin la ayuda de la IA 
 Lo próximo que quiero mejorar es optimizar mi trabajo junto a la IA: aprender a escribir código más corto y ordenado, por ejemplo usando funciones.
 ---
 
-*Nota: este proyecto lo desarrollé con ayuda de IA (Claude) como herramienta de optimizacion, desarrollo y revisión; realize y probé el código yo mismo.*
+> *Nota: este proyecto lo desarrollé con ayuda de IA (Claude) como herramienta de optimizacion, desarrollo y revisión; realize y probé el código yo mismo.*
