@@ -79,8 +79,6 @@ Este verificador como tal es solo un ejercicio y no reemplaza a una herramienta 
 
 ## Qué aprendí
 
-> ## Qué aprendí
-
 Lo más difícil fue el bloque que detecta 3 caracteres seguidos, porque usa cosas que no vi como tal en el liceo y tuve que analizarlo con pensamiento crítico para entender cómo funciona e investigarlo.
 
 Lo pude relacionar con algunos proyectos de ciberseguridad de mi liceo, y con mis cursos de Cisco en ciberseguridad y Python.
