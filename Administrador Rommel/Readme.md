@@ -43,7 +43,6 @@ Cada acción realizada (organizar una carpeta, buscar en un log, buscar en el ca
    3. Buscar producto en catálogo (CSV)
    4. Salir
    ```
-- Despues de seleccionar un numero para el 
 
 ### Ejemplo  Organizar archivos
 ```
