@@ -1,8 +1,0 @@
-10:01:23 INFO Usuario conectado desde 192.168.1.10
-10:02:05 ERROR Falla de conexión con el servidor DNS
-10:03:14 INFO Usuario conectado desde 192.168.1.15
-10:04:50 WARNING Latencia alta detectada en el router principal
-10:05:02 ERROR Tiempo de espera agotado al conectar con 192.168.1.1
-10:06:44 INFO Backup completado correctamente
-10:07:19 ERROR No se pudo resolver el dominio solicitado
-10:08:01 INFO Usuario desconectado desde 192.168.1.10
