@@ -1,12 +1,3 @@
-"""Dashboard del contenedor inteligente (Streamlit).
-
-Instalar:   pip install streamlit paho-mqtt plotly pandas
-Ejecutar:   streamlit run dashboard.py
-
-Tiene dos fuentes de datos (se elige en la barra lateral):
-  - Simulación: genera lecturas falsas para probar el dashboard sin el ESP32.
-  - MQTT: recibe el JSON real que publica el ESP32.
-"""
 import json
 import random
 from datetime import date, datetime, timedelta
@@ -18,7 +9,7 @@ import streamlit as st
 # ---------- CONFIGURACIÓN (cambiar aquí) ----------
 BROKER = "broker.hivemq.com"     # broker público gratuito
 PUERTO = 1883
-TEMA = "lixeira/datos"           # debe ser el mismo tema que usa el ESP32
+TEMA = "lixeira-rommel-2026/datos"           # debe ser el mismo tema que usa el ESP32
 ALTURA_CM = 103                  # distancia del sensor con el contenedor vacío
 UMBRAL_ALERTA = 80               # % desde el cual está "casi lleno" (LED verde)
 CAIDA_VACIADO = 20               # bajada de 20 puntos o más = lo vaciaron
