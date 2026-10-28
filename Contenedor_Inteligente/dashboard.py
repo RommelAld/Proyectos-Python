@@ -1,4 +1,17 @@
+"""Dashboard y panel de control del contenedor inteligente (Streamlit) - tema oscuro.
 
+Instalar:   pip install streamlit paho-mqtt plotly pandas
+Ejecutar:   streamlit run dashboard.py
+
+Tiene dos fuentes de datos (se elige en la barra lateral):
+  - Simulación: genera lecturas falsas para probar el dashboard sin el ESP32.
+  - MQTT: recibe el JSON real que publica el ESP32.
+
+Panel de control: el botón «Abrir contenedor» (barra lateral) simula la apertura.
+  - Simulación: suma una apertura al contador simulado.
+  - MQTT: publica {"cmd": "abrir"} en TEMA_CMD; el ESP32 mueve el servo,
+    suma una apertura y publica el contador actualizado.
+"""
 import json
 import random
 from datetime import date, datetime, timedelta
@@ -7,10 +20,11 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-# -- configuracion --
-BROKER = "broker.hivemq.com"     # Recibe la Info del ESP32 de forma publica y gratuita
+# ---------- CONFIGURACIÓN (cambiar aquí) ----------
+BROKER = "broker.hivemq.com"     # broker público gratuito
 PUERTO = 1883
-TEMA = "lixeira/datos"           # debe ser el mismo tema que usa el ESP32
+TEMA = "contenedor-rommel-k7x2/datos"           # debe ser el mismo tema que usa el ESP32
+TEMA_CMD = "contenedor-rommel-k7x2/comandos"    # tema por donde el dashboard envía órdenes al ESP32
 ALTURA_CM = 103                  # distancia del sensor con el contenedor vacío
 UMBRAL_ALERTA = 80               # % desde el cual está "casi lleno" (LED verde)
 CAIDA_VACIADO = 20               # bajada de 20 puntos o más = lo vaciaron
@@ -20,7 +34,7 @@ SEGUNDOS_SIN_SENAL = 15          # sin datos por más de esto = dispositivo caí
 # Acepta nombres de campos en portugués o español
 ALIAS = {"ocupacao_pct": "ocupacion_pct", "distancia": "distancia_cm"}
 
-# ---------- Parte Fisica del Dashboard ----------
+# ---------- COLORES ----------
 TARJETA = "#151a33"
 GRILLA = "#2a3055"
 TEXTO = "#c9cdea"
@@ -62,7 +76,7 @@ div[data-testid="stPlotlyChart"], .stPlotlyChart {background:#151a33; border-rad
 # ---------- FUENTES DE DATOS ----------
 @st.cache_resource
 def iniciar_mqtt():
-    """Se conecta al broker una sola vez y va guardando los mensajes."""
+    """Se conecta al broker una sola vez. Devuelve (mensajes, cliente)."""
     import paho.mqtt.client as mqtt
 
     mensajes = []
@@ -85,19 +99,22 @@ def iniciar_mqtt():
     cliente.on_message = al_recibir
     cliente.connect(BROKER, PUERTO, 60)
     cliente.loop_start()
-    return mensajes
+    return mensajes, cliente
+
+
+def estado_sim():
+    """Estado de la simulación (se crea la primera vez)."""
+    if "sim" not in st.session_state:
+        st.session_state.sim = {"pct": 10.0, "aperturas": 0, "datos": []}
+    return st.session_state.sim
 
 
 def simular():
     """Agrega una lectura falsa cada vez que se llama."""
-    if "sim" not in st.session_state:
-        st.session_state.sim = {"pct": 10.0, "aperturas": 0, "datos": []}
-    s = st.session_state.sim
+    s = estado_sim()
     s["pct"] += random.uniform(2, 6)
     if s["pct"] >= 108 or random.random() < 0.03:
         s["pct"] = random.uniform(0, 8)  # lo vaciaron
-    if random.random() < 0.5:
-        s["aperturas"] += 1
     pct = round(min(s["pct"], 110), 1)
     s["datos"].append({
         "id": "lixeira-sim",
@@ -254,7 +271,7 @@ def tablero(fuente):
         datos = simular()
     else:
         try:
-            datos = iniciar_mqtt()
+            datos, _ = iniciar_mqtt()
         except Exception as e:
             st.error(f"No se pudo conectar al broker MQTT: {e}")
             return
@@ -322,8 +339,25 @@ def tablero(fuente):
         st.json({k: str(v) for k, v in ultimo.to_dict().items()})
 
 
+def enviar_abrir(fuente):
+    """Botón «Abrir contenedor»: simula o envía la orden de apertura."""
+    if fuente == "Simulación":
+        estado_sim()["aperturas"] += 1
+        st.toast("Apertura simulada registrada")
+        return
+    try:
+        _, cliente = iniciar_mqtt()
+        cliente.publish(TEMA_CMD, json.dumps({"cmd": "abrir"}))
+        st.toast("Orden «abrir» enviada al contenedor")
+    except Exception as e:
+        st.sidebar.error(f"No se pudo enviar la orden: {e}")
+
+
 st.markdown(ESTILO, unsafe_allow_html=True)
 st.markdown("## 🗑️ Contenedor inteligente")
 fuente = st.sidebar.radio("Fuente de datos", ["Simulación", "MQTT"])
-st.sidebar.caption(f"Broker: {BROKER}\n\nTema: {TEMA}")
+st.sidebar.markdown("### Panel de control")
+if st.sidebar.button("🚪 Abrir contenedor"):
+    enviar_abrir(fuente)
+st.sidebar.caption(f"Broker: {BROKER}\n\nDatos: {TEMA}\n\nComandos: {TEMA_CMD}")
 tablero(fuente)
